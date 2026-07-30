@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using Timesheets.Data;
+
 namespace Timesheets
 {
     public class Program
@@ -6,6 +9,8 @@ namespace Timesheets
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(
+                builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Add services to the container.
 
