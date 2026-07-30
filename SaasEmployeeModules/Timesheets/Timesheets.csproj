@@ -30,8 +30,6 @@
     <Folder Include="Helpers\" />
     <Folder Include="Mapping\" />
     <Folder Include="Middleware\" />
-    <Folder Include="Repositories\Interfaces\" />
-    <Folder Include="Repositories\Implementations\" />
     <Folder Include="Services\Interfaces\" />
     <Folder Include="Services\Implementations\" />
     <Folder Include="Validators\" />

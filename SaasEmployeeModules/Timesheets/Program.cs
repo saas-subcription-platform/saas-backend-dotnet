@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Timesheets.Data;
+using Timesheets.Repositories.Interfaces;
+using Timesheets.Repositories.Implementations;
 
 namespace Timesheets
 {
@@ -13,6 +15,9 @@ namespace Timesheets
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(
                     builder.Configuration.GetConnectionString("DefaultConnection")));
+            
+            //Registering repository
+            builder.Services.AddScoped<ITimesheetRepository, TimesheetRepository>();
 
             // Add services to the container
             builder.Services.AddControllers();
