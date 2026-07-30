@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Timesheets.Common.Enums;
 
 namespace Timesheets.Entities
 {
@@ -17,8 +18,7 @@ namespace Timesheets.Entities
         public DateOnly WeekEndDate { get; set; }
 
         [Required]
-        [MaxLength(20)]
-        public string Status { get; set; } = "DRAFT";
+        public TimesheetStatus Status { get; set; } = TimesheetStatus.Draft;
 
         public decimal TotalHours { get; set; }
 

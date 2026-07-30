@@ -23,6 +23,11 @@ namespace Timesheets.Data
                 .WithOne(e => e.Timesheet)
                 .HasForeignKey(e => e.TimesheetId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Timesheet>()
+                .Property(t => t.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20);
         }
     }
 }
