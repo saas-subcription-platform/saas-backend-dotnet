@@ -15,10 +15,12 @@ namespace Timesheets.Entities
         public Timesheet Timesheet { get; set; } = null!;
 
         [Required]
+        [MaxLength(20)]
         public string Day { get; set; } = string.Empty;
 
         [Required]
-        public int ProjectId { get; set; }
+        [MaxLength(100)]
+        public string ProjectName { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(200)]
