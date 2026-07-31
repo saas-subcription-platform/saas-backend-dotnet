@@ -39,6 +39,13 @@ namespace TeamCollaboration.Entities
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
+        [Required]
+        [Column("conversation_id")]
+        public long ConversationId { get; set; }
+
+        [ForeignKey(nameof(ConversationId))]
+        public Conversation Conversation { get; set; } = null!;
+
         public ICollection<TeamMember> Members { get; set; } = new List<TeamMember>();
     }
 }

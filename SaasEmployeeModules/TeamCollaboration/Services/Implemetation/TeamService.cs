@@ -10,13 +10,19 @@ namespace TeamCollaboration.Services.Implementation
     {
         private readonly ITeamRepository _teamRepository;
         private readonly ITeamMemberService _teamMemberService;
+        private readonly IConversationRepository _conversationRepository;
+        private readonly IConversationParticipantRepository _conversationParticipantRepository;
 
         public TeamService(
             ITeamRepository teamRepository,
-            ITeamMemberService teamMemberService)
+            ITeamMemberService teamMemberService,
+            IConversationRepository conversationRepository,
+            IConversationParticipantRepository conversationParticipantRepository)
         {
             _teamRepository = teamRepository;
             _teamMemberService = teamMemberService;
+            _conversationRepository = conversationRepository;
+            _conversationParticipantRepository = conversationParticipantRepository;
         }
 
         public async Task<TeamResponseDto> GetOrCreateGeneralTeamAsync(
@@ -28,6 +34,11 @@ namespace TeamCollaboration.Services.Implementation
 
             if (generalTeam == null)
             {
+                var conversation = await _conversationRepository.AddAsync(
+                    new Conversation
+                    {
+                        Type = "GROUP"
+                    });
                 generalTeam = new Team
                 {
                     Name = "General",
@@ -35,10 +46,21 @@ namespace TeamCollaboration.Services.Implementation
                     IsGeneral = true,
                     CompanyId = companyId,
                     CreatedByUserId = userId,
+                    ConversationId = conversation.ConversationId,
                     CreatedAt = DateTime.UtcNow
                 };
 
                 generalTeam = await _teamRepository.AddAsync(generalTeam);
+                var participants = companyUsers
+                        .Select(user => new ConversationParticipant
+                        {
+                            ConversationId = conversation.ConversationId,
+                            UserId = user.UserId,
+                            JoinedAt = DateTime.UtcNow
+                        })
+                        .ToList();
+
+                await _conversationParticipantRepository.AddRangeAsync(participants);
             }
 
             await _teamMemberService.AddCompanyUsersToGeneralTeamAsync(
@@ -58,6 +80,7 @@ namespace TeamCollaboration.Services.Implementation
                 IsGeneral = team.IsGeneral,
                 CompanyId = team.CompanyId,
                 CreatedByUserId = team.CreatedByUserId,
+                ConversationId = team.ConversationId,
                 CreatedAt = team.CreatedAt,
                 UpdatedAt = team.UpdatedAt
             };
@@ -68,6 +91,16 @@ namespace TeamCollaboration.Services.Implementation
             long companyId,
             long userId)
         {
+            // Step 1: Create GROUP conversation
+            var conversation = new Conversation
+            {
+                Type = "GROUP",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            conversation = await _conversationRepository.AddAsync(conversation);
+
+            // Step 2: Create Team
             var team = new Team
             {
                 Name = request.Name.Trim(),
@@ -77,21 +110,49 @@ namespace TeamCollaboration.Services.Implementation
                 CompanyId = companyId,
                 CreatedByUserId = userId,
                 IsGeneral = false,
+                ConversationId = conversation.ConversationId,
                 CreatedAt = DateTime.UtcNow
             };
 
             team = await _teamRepository.AddAsync(team);
 
-            // Add the creator as ADMIN
+            // Step 3: Add creator as ADMIN
             await _teamMemberService.AddTeamMemberAsync(
                 team.TeamId,
                 userId,
                 "ADMIN");
 
-            // Add the selected members as MEMBER
+            // Step 4: Add selected users to TeamMembers
             await _teamMemberService.AddMembersToTeamAsync(
                 team.TeamId,
                 request.MemberIds);
+
+            // Step 5: Create Conversation Participants
+            var participants = new List<ConversationParticipant>();
+
+            // Creator
+            participants.Add(new ConversationParticipant
+            {
+                ConversationId = conversation.ConversationId,
+                UserId = userId,
+                JoinedAt = DateTime.UtcNow
+            });
+
+            // Selected Members
+            foreach (var memberId in request.MemberIds.Distinct())
+            {
+                if (memberId == userId)
+                    continue;
+
+                participants.Add(new ConversationParticipant
+                {
+                    ConversationId = conversation.ConversationId,
+                    UserId = memberId,
+                    JoinedAt = DateTime.UtcNow
+                });
+            }
+
+            await _conversationParticipantRepository.AddRangeAsync(participants);
 
             return MapToResponse(team);
         }

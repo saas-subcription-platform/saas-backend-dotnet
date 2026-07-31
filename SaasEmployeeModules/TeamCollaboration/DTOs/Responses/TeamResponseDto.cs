@@ -13,6 +13,7 @@
         public long CompanyId { get; set; }
 
         public long CreatedByUserId { get; set; }
+        public long ConversationId { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

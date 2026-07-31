@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TeamCollaboration.Data;
@@ -11,9 +12,11 @@ using TeamCollaboration.Data;
 namespace TeamCollaboration.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260731104514_AddMessagingTables")]
+    partial class AddMessagingTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,6 +37,10 @@ namespace TeamCollaboration.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<long?>("TeamId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("team_id");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -129,10 +136,6 @@ namespace TeamCollaboration.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("company_id");
 
-                    b.Property<long>("ConversationId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("conversation_id");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -161,8 +164,6 @@ namespace TeamCollaboration.Migrations
                         .HasColumnName("updated_at");
 
                     b.HasKey("TeamId");
-
-                    b.HasIndex("ConversationId");
 
                     b.ToTable("teams");
                 });
@@ -216,17 +217,6 @@ namespace TeamCollaboration.Migrations
                 {
                     b.HasOne("TeamCollaboration.Entities.Conversation", "Conversation")
                         .WithMany("Messages")
-                        .HasForeignKey("ConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Conversation");
-                });
-
-            modelBuilder.Entity("TeamCollaboration.Entities.Team", b =>
-                {
-                    b.HasOne("TeamCollaboration.Entities.Conversation", "Conversation")
-                        .WithMany()
                         .HasForeignKey("ConversationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

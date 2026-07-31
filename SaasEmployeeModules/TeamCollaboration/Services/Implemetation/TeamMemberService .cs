@@ -9,45 +9,84 @@ namespace TeamCollaboration.Services.Implementation
     {
         private readonly ITeamMemberRepository _teamMemberRepository;
         private readonly ISpringBootUserService _springBootUserService;
+        private readonly IConversationParticipantRepository _conversationParticipantRepository;
+        private readonly ITeamRepository _teamRepository;
 
-
-        public TeamMemberService(ITeamMemberRepository teamMemberRepository, ISpringBootUserService springBootUserService)
+        public TeamMemberService(
+            ITeamMemberRepository teamMemberRepository,
+            ISpringBootUserService springBootUserService,
+            IConversationParticipantRepository conversationParticipantRepository,
+            ITeamRepository teamRepository)
         {
             _teamMemberRepository = teamMemberRepository;
             _springBootUserService = springBootUserService;
-
+            _conversationParticipantRepository = conversationParticipantRepository;
+            _teamRepository = teamRepository;
         }
 
         public async Task AddCompanyUsersToGeneralTeamAsync(
             long teamId,
             List<UserResponseDto> users)
         {
+            // Get the General Team
+            var team = await _teamRepository.GetByIdAsync(teamId);
+
+            if (team == null)
+                throw new Exception("Team not found.");
+
+            // Load existing conversation participants once
+            var participants =
+                await _conversationParticipantRepository.GetParticipantsAsync(
+                    team.ConversationId);
+
+            var participantIds = participants
+                .Select(p => p.UserId)
+                .ToHashSet();
+
             foreach (var user in users)
             {
+                // ---------------- TEAM MEMBER ----------------
+
                 var existingMember =
                     await _teamMemberRepository.GetTeamMemberAsync(
                         teamId,
                         user.UserId);
 
-                if (existingMember != null)
-                    continue;
-
-                var teamMember = new TeamMember
+                if (existingMember == null)
                 {
-                    TeamId = teamId,
-                    UserId = user.UserId,
-                    Role = "MEMBER"
-                };
+                    var teamMember = new TeamMember
+                    {
+                        TeamId = teamId,
+                        UserId = user.UserId,
+                        Role = "MEMBER"
+                    };
 
-                await _teamMemberRepository.AddTeamMemberAsync(teamMember);
+                    await _teamMemberRepository.AddTeamMemberAsync(teamMember);
+                }
+
+                // -------- CONVERSATION PARTICIPANT --------
+
+                if (!participantIds.Contains(user.UserId))
+                {
+                    await _conversationParticipantRepository.AddAsync(
+                        new ConversationParticipant
+                        {
+                            ConversationId = team.ConversationId,
+                            UserId = user.UserId,
+                            JoinedAt = DateTime.UtcNow
+                        });
+
+                    // Keep the HashSet updated to avoid duplicates
+                    participantIds.Add(user.UserId);
+                }
             }
 
             await _teamMemberRepository.SaveChangesAsync();
         }
 
         public async Task AddMembersToTeamAsync(
-    long teamId,
-    List<long> memberIds)
+            long teamId,
+            List<long> memberIds)
         {
             foreach (var userId in memberIds)
             {
@@ -77,9 +116,10 @@ namespace TeamCollaboration.Services.Implementation
             long userId,
             string role)
         {
-            var existingMember = await _teamMemberRepository.GetTeamMemberAsync(
-                teamId,
-                userId);
+            var existingMember =
+                await _teamMemberRepository.GetTeamMemberAsync(
+                    teamId,
+                    userId);
 
             if (existingMember != null)
                 return;

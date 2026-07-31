@@ -42,6 +42,14 @@ namespace TeamCollaboration
             builder.Services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
             builder.Services.AddScoped<ITeamMemberService, TeamMemberService>();
 
+            builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+            builder.Services.AddScoped<IConversationService, ConversationService>();
+
+            builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+            builder.Services.AddScoped<IConversationParticipantRepository, ConversationParticipantRepository>();
+
+            builder.Services.AddScoped<IMessageService, MessageService>();
+
             builder.Services.AddHttpClient<ISpringBootUserService, SpringBootUserService>();
 
             var app = builder.Build();

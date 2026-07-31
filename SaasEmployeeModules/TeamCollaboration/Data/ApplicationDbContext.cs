@@ -13,5 +13,11 @@ namespace TeamCollaboration.Data
 
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamMember> TeamMembers { get; set;  }
+
+        public DbSet<Conversation> Conversations { get; set; }
+
+        public DbSet<ConversationParticipant> ConversationParticipants { get; set; }
+
+        public DbSet<Message> Messages { get; set; }
     }
 }
