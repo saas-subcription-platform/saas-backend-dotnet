@@ -45,9 +45,59 @@ namespace TeamCollaboration.Services.Implementation
             await _teamMemberRepository.SaveChangesAsync();
         }
 
-        public async Task<List<UserResponseDto>> GetTeamMembersAsync(
+        public async Task AddMembersToTeamAsync(
     long teamId,
-    string jwtToken)
+    List<long> memberIds)
+        {
+            foreach (var userId in memberIds)
+            {
+                var existingMember =
+                    await _teamMemberRepository.GetTeamMemberAsync(
+                        teamId,
+                        userId);
+
+                if (existingMember != null)
+                    continue;
+
+                var member = new TeamMember
+                {
+                    TeamId = teamId,
+                    UserId = userId,
+                    Role = "MEMBER"
+                };
+
+                await _teamMemberRepository.AddTeamMemberAsync(member);
+            }
+
+            await _teamMemberRepository.SaveChangesAsync();
+        }
+
+        public async Task AddTeamMemberAsync(
+            long teamId,
+            long userId,
+            string role)
+        {
+            var existingMember = await _teamMemberRepository.GetTeamMemberAsync(
+                teamId,
+                userId);
+
+            if (existingMember != null)
+                return;
+
+            var teamMember = new TeamMember
+            {
+                TeamId = teamId,
+                UserId = userId,
+                Role = role
+            };
+
+            await _teamMemberRepository.AddTeamMemberAsync(teamMember);
+            await _teamMemberRepository.SaveChangesAsync();
+        }
+
+        public async Task<List<UserResponseDto>> GetTeamMembersAsync(
+            long teamId,
+            string jwtToken)
         {
             // Get members from database
             var teamMembers = await _teamMemberRepository.GetTeamMembersAsync(teamId);

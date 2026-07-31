@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TeamCollaboration.DTOs.Requests;
 using TeamCollaboration.Services.Interfaces;
 
 namespace TeamCollaboration.Controllers
@@ -108,5 +109,30 @@ namespace TeamCollaboration.Controllers
 
             return Ok(users);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateTeam(
+                [FromBody] CreateTeamRequestDto request)
+        {
+            var authHeader = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+
+            if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
+            {
+                return Unauthorized("JWT token is missing.");
+            }
+
+            var token = authHeader.Substring("Bearer ".Length);
+
+            var currentUser = await _springBootUserService.GetCurrentUserAsync(token);
+
+            var team = await _teamService.CreateTeamAsync(
+                request,
+                currentUser.CompanyId,
+                currentUser.UserId);
+
+            return Ok(team);
+        }
+
+
     }
 }

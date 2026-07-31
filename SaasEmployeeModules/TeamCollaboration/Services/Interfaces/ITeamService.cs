@@ -24,5 +24,7 @@ namespace TeamCollaboration.Services.Interfaces
             UpdateTeamRequestDto request);
 
         Task DeleteTeamAsync(long teamId);
+
+
     }
 }

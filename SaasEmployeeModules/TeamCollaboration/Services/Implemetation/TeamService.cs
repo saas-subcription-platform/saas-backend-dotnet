@@ -63,12 +63,37 @@ namespace TeamCollaboration.Services.Implementation
             };
         }
 
-        public Task<TeamResponseDto> CreateTeamAsync(
+        public async Task<TeamResponseDto> CreateTeamAsync(
             CreateTeamRequestDto request,
             long companyId,
             long userId)
         {
-            throw new NotImplementedException();
+            var team = new Team
+            {
+                Name = request.Name.Trim(),
+                Description = string.IsNullOrWhiteSpace(request.Description)
+                    ? null
+                    : request.Description.Trim(),
+                CompanyId = companyId,
+                CreatedByUserId = userId,
+                IsGeneral = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            team = await _teamRepository.AddAsync(team);
+
+            // Add the creator as ADMIN
+            await _teamMemberService.AddTeamMemberAsync(
+                team.TeamId,
+                userId,
+                "ADMIN");
+
+            // Add the selected members as MEMBER
+            await _teamMemberService.AddMembersToTeamAsync(
+                team.TeamId,
+                request.MemberIds);
+
+            return MapToResponse(team);
         }
 
         public async Task<List<TeamResponseDto>> GetTeamsByCompanyAsync(long companyId)

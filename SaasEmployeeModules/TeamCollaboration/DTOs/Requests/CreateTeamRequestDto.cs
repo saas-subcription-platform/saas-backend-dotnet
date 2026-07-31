@@ -10,5 +10,9 @@ namespace TeamCollaboration.DTOs.Requests
 
         [StringLength(500)]
         public string? Description { get; set; }
+
+        [Required]
+        [MinLength(1, ErrorMessage = "Select at least one team member.")]
+        public List<long> MemberIds { get; set; } = new();
     }
 }
