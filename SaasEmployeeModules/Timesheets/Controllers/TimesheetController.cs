@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Timesheets.DTOs.Requests;
 using Timesheets.Services.Interfaces;
 
 namespace Timesheets.Controllers
@@ -15,14 +16,60 @@ namespace Timesheets.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMyTimesheets()
+        public async Task<IActionResult> GetMyTimesheets([FromQuery] int employeeId)
         {
-            // Temporary until JWT integration
-            int employeeId = 25;
+            var result = await _timesheetService.GetAllByEmployeeIdAsync(employeeId);
 
-            var timesheets = await _timesheetService.GetAllByEmployeeIdAsync(employeeId);
+            return Ok(result);
+        }
 
-            return Ok(timesheets);
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetTimesheetById(int id, [FromQuery] int employeeId)
+        {
+            var result = await _timesheetService.GetByIdAsync(id, employeeId);
+
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateTimesheet([FromBody] TimesheetRequest request, [FromQuery] int employeeId)
+        {
+            Console.WriteLine("POST HIT");
+
+            var result = await _timesheetService.CreateAsync(request, employeeId);
+
+            return CreatedAtAction(
+                nameof(GetTimesheetById),
+                new { id = result.Id, employeeId },
+                result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTimesheet(int id, [FromBody] TimesheetRequest request, [FromQuery] int employeeId)
+        {
+            var result = await _timesheetService.UpdateAsync(
+                id,
+                request,
+                employeeId);
+
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpPatch("{id}/submit")]
+        public async Task<IActionResult> SubmitTimesheet(int id, [FromQuery] int employeeId)
+        {
+            var result = await _timesheetService.SubmitAsync(id, employeeId);
+
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
         }
     }
 }
