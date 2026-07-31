@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Timesheets.DTOs.Requests;
 using Timesheets.DTOs.Responses;
 using Timesheets.Entities;
 
@@ -13,6 +14,10 @@ namespace Timesheets.Mapping
             CreateMap<Timesheet, TimesheetResponse>()
                 .ForMember(dest => dest.Status,
                     opt => opt.MapFrom(src => src.Status.ToString()));
+
+            CreateMap<TimesheetRequest, Timesheet>();
+
+            CreateMap<TimesheetEntryRequest, TimesheetEntry>();
         }
     }
 }

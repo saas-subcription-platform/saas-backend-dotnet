@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Timesheets.Common.Enums;
 
 namespace Timesheets.Entities
 {
+    [Table("timesheets")]
     public class Timesheet
     {
         [Key]
