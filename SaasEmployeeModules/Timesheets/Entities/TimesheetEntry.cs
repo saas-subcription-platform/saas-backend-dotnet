@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Timesheets.Entities
 {
+    [Table("timesheet_entries")]
     public class TimesheetEntry
     {
         [Key]
