@@ -1,4 +1,7 @@
 <Solution>
   <Project Path="GoalandPerformane/GoalandPerformance.csproj" Id="67140c59-e95f-4823-b97c-f6349c4ebf96" />
+
+  <Project Path="TeamCollaboration/TeamCollaboration.csproj" Id="c772b4f5-f771-40e0-8740-8fd5be23dd10" />
+
   <Project Path="Timesheets/Timesheets.csproj" />
 </Solution>

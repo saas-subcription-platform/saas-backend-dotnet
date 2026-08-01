@@ -1,3 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using Timesheets.Data;
+using Timesheets.Mapping;
+using Timesheets.Repositories.Implementations;
+using Timesheets.Repositories.Interfaces;
+using Timesheets.Services.Interfaces;
 
 namespace Timesheets
 {
@@ -7,24 +13,52 @@ namespace Timesheets
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Database Configuration
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(
+                    builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            // cors
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("ReactPolicy", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
+            // Registering repository
+            builder.Services.AddScoped<ITimesheetRepository, TimesheetRepository>();
+
+            // Registering service
+            builder.Services.AddScoped<ITimesheetService, TimesheetService>();
+
+            // Add services to the container
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+
+            // Swagger Configuration
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
+            // Automapper 
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {
-                app.MapOpenApi();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
+            app.UseCors("ReactPolicy");
 
+            app.UseAuthorization();
 
             app.MapControllers();
 
