@@ -1,6 +1,8 @@
 ﻿using GoalandPerformance.Entities;
 using GoalandPerformance.Repositories.Interfaces;
 using GoalandPerformance.Services.Interfaces;
+using GoalandPerformance.DTOs.Response;
+using System.Linq;
 
 namespace GoalandPerformance.Services.Implementations
 {
@@ -33,6 +35,11 @@ namespace GoalandPerformance.Services.Implementations
             goal.Progress = 0;
             goal.Status = GoalStatus.NotStarted;
 
+            goal.Deadline = DateTime.SpecifyKind(goal.Deadline, DateTimeKind.Utc);
+
+            goal.CreatedAt = DateTime.UtcNow;
+            goal.UpdatedAt = DateTime.UtcNow;
+
             await _goalRepository.AddAsync(goal);
             await _goalRepository.SaveChangesAsync();
 
@@ -50,7 +57,7 @@ namespace GoalandPerformance.Services.Implementations
             existingGoal.Objective = goal.Objective;
             existingGoal.Category = goal.Category;
             existingGoal.Priority = goal.Priority;
-            existingGoal.Deadline = goal.Deadline;
+            existingGoal.Deadline = DateTime.SpecifyKind(goal.Deadline, DateTimeKind.Utc);
             existingGoal.Progress = goal.Progress;
             existingGoal.Status = goal.Status;
 
@@ -71,6 +78,33 @@ namespace GoalandPerformance.Services.Implementations
             await _goalRepository.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<GoalStatisticsDto> GetGoalStatisticsAsync(long companyId)
+        {
+            var goals = (await _goalRepository.GetByCompanyIdAsync(companyId)).ToList();
+
+            var completedGoals = goals.Count(g => g.Status == GoalStatus.Completed);
+
+            var overdueGoals = goals.Count(g =>
+                g.Status != GoalStatus.Completed &&
+                g.Deadline < DateTime.UtcNow);
+
+            var activeGoals = goals.Count(g =>
+                g.Status != GoalStatus.Completed &&
+                g.Deadline >= DateTime.UtcNow);
+
+            var averageProgress = goals.Any()
+                ? (int)Math.Round(goals.Average(g => g.Progress))
+                : 0;
+
+            return new GoalStatisticsDto
+            {
+                ActiveGoals = activeGoals,
+                CompletedGoals = completedGoals,
+                OverdueGoals = overdueGoals,
+                AverageProgress = averageProgress
+            };
         }
     }
 }

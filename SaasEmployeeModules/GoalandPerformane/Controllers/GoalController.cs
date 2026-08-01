@@ -1,6 +1,7 @@
 ﻿using GoalandPerformance.Entities;
 using GoalandPerformance.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using GoalandPerformance.DTOs.Response;
 
 namespace GoalandPerformance.Controllers
 {
@@ -59,6 +60,14 @@ namespace GoalandPerformance.Controllers
         }
 
 
+        // GET: api/Goal/company/3/stats
+        [HttpGet("company/{companyId}/stats")]
+        public async Task<IActionResult> GetGoalStatistics(long companyId)
+        {
+            var statistics = await _goalService.GetGoalStatisticsAsync(companyId);
+
+            return Ok(statistics);
+        }
 
         // POST: api/Goal
         [HttpPost]

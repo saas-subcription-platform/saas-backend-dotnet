@@ -1,4 +1,5 @@
 ﻿using GoalandPerformance.Entities;
+using GoalandPerformance.DTOs.Response;
 
 namespace GoalandPerformance.Services.Interfaces
 {
@@ -15,5 +16,8 @@ namespace GoalandPerformance.Services.Interfaces
         Task<bool> UpdateGoalAsync(long id, Goal goal);
 
         Task<bool> DeleteGoalAsync(long id);
+
+        Task<GoalStatisticsDto> GetGoalStatisticsAsync(long companyId);
+
     }
 }
