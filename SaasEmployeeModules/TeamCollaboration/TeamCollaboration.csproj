@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>daa28885-2e47-4adc-99d1-653b1c24c827</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,10 +25,6 @@
 
   <ItemGroup>
     <Folder Include="Common\" />
-    <Folder Include="Exceptions\" />
-    <Folder Include="Helpers\" />
-    <Folder Include="Mapping\" />
-    <Folder Include="Middlewares\" />
   </ItemGroup>
 
 </Project>

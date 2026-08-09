@@ -54,6 +54,13 @@ namespace TeamCollaboration
 
             var app = builder.Build();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                db.Database.Migrate();
+            }
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -63,7 +70,7 @@ namespace TeamCollaboration
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+           // app.UseHttpsRedirection();
 
             // Enable CORS
             app.UseCors("ReactPolicy");
