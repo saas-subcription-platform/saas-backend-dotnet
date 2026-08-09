@@ -29,7 +29,7 @@ namespace TeamCollaboration
                 options.AddPolicy("ReactPolicy", policy =>
                 {
                     policy
-                        .WithOrigins("http://localhost:5173")
+                        .WithOrigins("http://localhost:5173", "http://16.192.104.21")
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
